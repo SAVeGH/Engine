@@ -58,8 +58,15 @@ declare @hotEngVolume float = 0.000049  -- полный объем обоих г
 -- выхлоп 14 градусов - 14 / 60 = 0.23... Это доля объема на котором откроется выхлоп
 -- перепуск 7 градусов - 0.116...
 -- впуск 7 градусов
-declare @exhaustVPart float = @exhaustAngle / @pistonDiffAngle; -- 60 градусов - разница хода лопастей. Т.е. ход лопастей не включает камеру сгорания. Т.е. весь 
+--declare @exhaustVPart float = @exhaustAngle / @pistonDiffAngle; -- 60 градусов - разница хода лопастей. Т.е. ход лопастей не включает камеру сгорания. Т.е. весь 
                                                                 -- объем горячей камеры это ход лопастей + объем камеры сгорания. 14/60 это доля от хода лопастей, а не всей камеры горячей.
+
+declare @exhaustVPart float = 1.0 - (select max(volumePartRotor) from phases where Angle < 180.0 and Exhaust is NULL);
+
+declare @blowVPart float = 1.0 - (select max(volumePartRotor) from phases where Angle < 180.0 and Blow is NULL);
+--declare @blowVPart float = @blowAngle / @pistonDiffAngle;
+--declare @intakeVPart float = @intakeAngle / @pistonDiffAngle;
+declare @intakeVPart float = (select min(volumePartRotor) from phases where Angle < 180.0 and Intake is NULL);
 
 -- т.е. если размер камеры сжигания x то сжимаемая часть это (x * @compressionRatio - x) и равна она (1.0 - @exhaustVPart) - доле изменяемого объема проходимого лопастью при сжатии 
 declare @hotChamberV float = @hotEngVolume / 2.0; -- вся горячая камера вместе с выхлопом (НМТ) и камерой сгорания
@@ -99,9 +106,8 @@ declare @compressionHotChamberV float = @bladePassV - @exhaustPassV;
 -- весь сжимаемый объем включая камеру сгорания после перекрытия вхлопа
 declare @compressableHotChamberV float = @compressionHotChamberV + @hotTopChamberV;
 
--- по половине от выхлопа
-declare @blowPassV float = @exhaustPassV / 2.0;
-declare @intakePassV float = @exhaustPassV / 2.0;
+declare @blowPassV float = @bladePassV * @blowVPart;
+declare @intakePassV float = @bladePassV * @intakeVPart;
 
 -- в холодной камере сжимается такой же объем как и в горячей т.к. сумма перепуск + впуск равна вхлопу (для 2 атм)
 declare @compressionColdChamberV float = @compressionHotChamberV * (1.0 / (@coldCompressionRatio - 1.0)); 

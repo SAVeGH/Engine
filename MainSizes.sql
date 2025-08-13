@@ -10,18 +10,22 @@ declare @pistonDiffAngle float = 51.1523727680347; -- это полное рас
 
 declare @diffScale float = @pistonDiffAngle / 180.0; -- сколько градусов хода лопастей соответсвует грудусу на диаграмме фаз
 
-declare @exhaustAngle float = (180.0 - (select max(Angle) from phases where Exhaust is NULL and round(Angle,2) < 180.0)) * @diffScale;
-declare @blowAngle float = (180.0 - (select max(Angle) from phases where Blow is NULL and round(Angle,2) < 180.0)) * @diffScale;
-declare @intakeAngle float = (180.0 - (select min(Angle) from phases where Intake is NULL and round(Angle,2) < 180.0)) * @diffScale;
+--declare @exhaustAngle float = (180.0 - (select max(Angle) from phases where Exhaust is NULL and round(Angle,2) < 180.0)) * @diffScale;
+--declare @blowAngle float = (180.0 - (select max(Angle) from phases where Blow is NULL and round(Angle,2) < 180.0)) * @diffScale;
+--declare @intakeAngle float = (180.0 - (select min(Angle) from phases where Intake is NULL and round(Angle,2) < 180.0)) * @diffScale;
 
 declare @hotEngVolume float = 0.000049;
 
-declare @exhaustVPart float = @exhaustAngle / @pistonDiffAngle;  -- 60 градусов - разница хода лопастей. Т.е. ход лопастей не включает камеру сгорания. Т.е. весь 
+--declare @exhaustVPart float = @exhaustAngle / @pistonDiffAngle;  -- 60 градусов - разница хода лопастей. Т.е. ход лопастей не включает камеру сгорания. Т.е. весь 
                                                                  -- объем горячей камеры это ход лопастей + объем камеры сгорания. 
 																 -- 14/60 это доля от хода лопастей, а не всей камеры горячей.
 
-declare @blowVPart float = @blowAngle / @pistonDiffAngle;
-declare @intakeVPart float = @intakeAngle / @pistonDiffAngle;
+declare @exhaustVPart float = 1.0 - (select max(volumePartRotor) from phases where Angle < 180.0 and Exhaust is NULL);
+
+declare @blowVPart float = 1.0 - (select max(volumePartRotor) from phases where Angle < 180.0 and Blow is NULL);
+--declare @blowVPart float = @blowAngle / @pistonDiffAngle;
+--declare @intakeVPart float = @intakeAngle / @pistonDiffAngle;
+declare @intakeVPart float = (select min(volumePartRotor) from phases where Angle < 180.0 and Intake is NULL);
 
 --select @exhaustVPart return 
 declare @hotChamberV float = @hotEngVolume / 2.0; -- вся горячая камера вместе с выхлопом (НМТ) и камерой сгорания
