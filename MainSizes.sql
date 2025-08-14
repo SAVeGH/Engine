@@ -21,10 +21,7 @@ declare @hotEngVolume float = 0.000049;
 																 -- 14/60 это доля от хода лопастей, а не всей камеры горячей.
 
 declare @exhaustVPart float = 1.0 - (select max(volumePartRotor) from phases where Angle < 180.0 and Exhaust is NULL);
-
 declare @blowVPart float = 1.0 - (select max(volumePartRotor) from phases where Angle < 180.0 and Blow is NULL);
---declare @blowVPart float = @blowAngle / @pistonDiffAngle;
---declare @intakeVPart float = @intakeAngle / @pistonDiffAngle;
 declare @intakeVPart float = (select min(volumePartRotor) from phases where Angle < 180.0 and Intake is NULL);
 
 --select @exhaustVPart return 
@@ -164,13 +161,11 @@ select * from @sizes
 
 -- размер камер общий
 -- internalR	externalR	h	                fullSize	        relation	        fullRelation        S                       pistonAngle         channelWidth         channelAngle
--- 0,038	    0,05	  0,0384696680536721	0,0504696680536721	3,20580567113934	4,20580567113934	0,000574733352173298	37,4110049828676	0,00537561409614254  60,0514349355843
+-- 0,038	    0,05	   0,0384830011284999	0,0504830011284998	3,20691676070832	4,20691676070832	0,000574893349071231	36,1556021348037	0,00797557061972236	 60,0681523285628
+-- 0.38         0.05       0.038                                                                                                    36                  0.08                 60
 
 -- угловой размер камеры сгорания
--- 4.35742434690666
-
--- угловой размер лопасти
--- 37.4110049828676
+-- 4,34197557652582
 
 -- угол начала канала продувки от кромки лопасти при полностью раскрытой холоной камере
 --10.3856030845143
