@@ -24,6 +24,13 @@ declare @exhaustVPart float = 1.0 - (select max(volumePartRotor) from phases whe
 declare @blowVPart float = 1.0 - (select max(volumePartRotor) from phases where Angle < 180.0 and Blow is NULL);
 declare @intakeVPart float = (select min(volumePartRotor) from phases where Angle < 180.0 and Intake is NULL);
 
+declare @exhaustAngle float = @exhaustVPart * @pistonDiffAngle;
+declare @blowAngle float = @blowVPart * @pistonDiffAngle;
+declare @intakeAngle float = @intakeVPart * @pistonDiffAngle;
+
+--select @exhaustAngle as exhaustAngle, @blowAngle as blowAngle, @intakeAngle as intakeAngle
+--return
+
 --select @exhaustVPart return 
 declare @hotChamberV float = @hotEngVolume / 2.0; -- вся горячая камера вместе с выхлопом (НМТ) и камерой сгорания
 declare @hotTopChamberV float;
@@ -166,11 +173,17 @@ select * from @sizes
 
 -- угловой размер камеры сгорания
 -- 4,34197557652582
+-- 4
 
 -- угол начала канала продувки от кромки лопасти при полностью раскрытой холоной камере
 --10.3856030845143
 
+-- разность хода лопастей
+-- 51.1523727680347  -- под этот diffRelation (2.7) рассчитана шестерня. Нельзя менять без перенарезки шестерни.
 
+--exhaustAngle	    blowAngle	        intakeAngle
+--18,5875559440911	10,9351862620551	20,4991479741028
+-- 19               11                  21
 
 -- свеча 10 x 8.6 (под ключ 14, резьба M10)
 -- диаметр расточки 1,155 * 14 = 16,7

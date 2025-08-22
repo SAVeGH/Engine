@@ -45,9 +45,9 @@ declare @pistonDiffAngle float = 51.1523727680347;
 
 declare @diffScale float = @pistonDiffAngle / 180.0; -- сколько градусов хода лопастей соответсвует грудусу на диаграмме фаз
 
-declare @exhaustAngle float = (180.0 - (select max(Angle) from phases where Exhaust is NULL and round(Angle,2) < 180.0)) * @diffScale;
-declare @blowAngle float = (180.0 - (select max(Angle) from phases where Blow is NULL and round(Angle,2) < 180.0)) * @diffScale;
-declare @intakeAngle float = (180.0 - (select min(Angle) from phases where Intake is NULL and round(Angle,2) < 180.0)) * @diffScale;
+--declare @exhaustAngle float = (180.0 - (select max(Angle) from phases where Exhaust is NULL and round(Angle,2) < 180.0)) * @diffScale;
+--declare @blowAngle float = (180.0 - (select max(Angle) from phases where Blow is NULL and round(Angle,2) < 180.0)) * @diffScale;
+--declare @intakeAngle float = (180.0 - (select min(Angle) from phases where Intake is NULL and round(Angle,2) < 180.0)) * @diffScale;
 
 declare @hotEngVolume float = 0.000049  -- полный объем обоих горячих камер м^3 - 49 см^3 - объем включая окно выхлопа и камеру сгорания (объем в НМТ)
 -- проценты пересчитаны для роторного двигателя по доле пройденного объема. Т.е. если выхлоп занимает 38% (68 градусов на сторону т.е. из 180)
@@ -61,12 +61,23 @@ declare @hotEngVolume float = 0.000049  -- полный объем обоих г
 --declare @exhaustVPart float = @exhaustAngle / @pistonDiffAngle; -- 60 градусов - разница хода лопастей. Т.е. ход лопастей не включает камеру сгорания. Т.е. весь 
                                                                 -- объем горячей камеры это ход лопастей + объем камеры сгорания. 14/60 это доля от хода лопастей, а не всей камеры горячей.
 
-declare @exhaustVPart float = 1.0 - (select max(volumePartRotor) from phases where Angle < 180.0 and Exhaust is NULL);
+--declare @exhaustVPart float = 1.0 - (select max(volumePartRotor) from phases where Angle < 180.0 and Exhaust is NULL);
 
-declare @blowVPart float = 1.0 - (select max(volumePartRotor) from phases where Angle < 180.0 and Blow is NULL);
+--declare @blowVPart float = 1.0 - (select max(volumePartRotor) from phases where Angle < 180.0 and Blow is NULL);
 --declare @blowVPart float = @blowAngle / @pistonDiffAngle;
 --declare @intakeVPart float = @intakeAngle / @pistonDiffAngle;
+--declare @intakeVPart float = (select min(volumePartRotor) from phases where Angle < 180.0 and Intake is NULL);
+
+
+
+declare @exhaustVPart float = 1.0 - (select max(volumePartRotor) from phases where Angle < 180.0 and Exhaust is NULL);
+declare @blowVPart float = 1.0 - (select max(volumePartRotor) from phases where Angle < 180.0 and Blow is NULL);
 declare @intakeVPart float = (select min(volumePartRotor) from phases where Angle < 180.0 and Intake is NULL);
+
+declare @exhaustAngle float = @exhaustVPart * @pistonDiffAngle;
+declare @blowAngle float = @blowVPart * @pistonDiffAngle;
+declare @intakeAngle float = @intakeVPart * @pistonDiffAngle;
+
 
 -- т.е. если размер камеры сжигания x то сжимаемая часть это (x * @compressionRatio - x) и равна она (1.0 - @exhaustVPart) - доле изменяемого объема проходимого лопастью при сжатии 
 declare @hotChamberV float = @hotEngVolume / 2.0; -- вся горячая камера вместе с выхлопом (НМТ) и камерой сгорания
