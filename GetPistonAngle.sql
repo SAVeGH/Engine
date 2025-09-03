@@ -19,24 +19,28 @@ returns
 as
 begin
 
-declare @sideSize float = 0.012;
-declare @externalR float = @internalR + @sideSize; -- внешний радиус камеры
+declare @sideSize float = 0.012; -- высота камеры
 declare @pathR float = @internalR + (@sideSize / 2.0); -- радиус средней линии камер
+
+declare @channelSideSize float = 0.008; -- высота перекидного канала
+declare @externalChannelR float = @pathR + (@channelSideSize / 2.0); -- внешний радиус канала
+declare @internalChannelR float = @pathR - (@channelSideSize / 2.0); -- внутренний радиус канала
+
 declare @pathLen float = 2.0 * PI() * @pathR; -- длина средней линии
 declare @pistonDiffAngle float = 51.1523727680347; -- это полное раскрытие лопастей (разность хода т.е. 180 на диагармме фаз)
 
 -- часть объема при которой происходит продувка
-declare @blowVolumePart float = 1.0 - (select min(volumePartRotor) from phases where Angle < 180.0 and Blow = 1);
+declare @blowVolumePart float = 1.0 - (select max(volumePartRotor) from phases where Angle < 180.0 and Blow is NULL);;
 -- все раскрытие камеры 51 градус. Сколько будет занимать угол продувки
 declare @blowChаmberAngle float = @pistonDiffAngle * @blowVolumePart;
 
 -- сколько боковой площали (сектор в одни градус какой площади) приходится на один градус
-declare @sPerAngle float = (POWER(@externalR, 2.0) * PI() - POWER(@internalR , 2.0) * PI()) / 360.0;
+declare @sPerAngle float = (POWER(@externalChannelR, 2.0) * PI() - POWER(@internalChannelR , 2.0) * PI()) / 360.0;
 
 -- сколько градусов
 -- площадь канала
 declare @blowS float = @sPerAngle * @blowChаmberAngle;
-declare @channelWidth float = @blowS / @sideSize;
+declare @channelWidth float = @blowS / @channelSideSize;
 
 -- тор площади сечения @blowS
 declare @blowFullV float = @blowS * @pathLen;
