@@ -523,6 +523,8 @@ declare @stepM float;
 declare @pDiff float;
 declare @tDiff float;
 
+--select * from @arms order by angle
+
 -- Cycle для горячей камеры
 while @currentAngle <= 360.0 
 begin
@@ -579,8 +581,8 @@ begin
 	-- @stepArm1 * @stepRelation1 * @unit - реальное эффективное плечо в м
 	-- @angleStep * @Rad - шаг интегрирования в радианах (т.к. работа находится умножением на угол в радианах)
 	-- @stepF - сила в Н
-	set @mMinus = @stepArm1 /*м*/ * @stepF /*H*/ * @stepRelation1 * @angleStep * @Rad * @unit ; -- момент опорного ротора Н*м
-	set @mPlus = @stepArm2 * @stepF * @stepRelation2 * @angleStep * @Rad * @unit; -- момент ведущего ротора
+	set @mMinus = @stepArm1 /*м*/ * @stepF /*H*/ * @stepRelation1 * /*@angleStep * @Rad */ @unit ; -- момент опорного ротора Н*м
+	set @mPlus = @stepArm2 * @stepF * @stepRelation2 * /*@angleStep * @Rad */ @unit; -- момент ведущего ротора
 	set @stepM = @mPlus - @mMinus; -- результирующий момент
 	set @stepWork = @stepM * @angleStep * @Rad; -- Ватт 
 
@@ -661,8 +663,8 @@ begin
 		set @cycleConstantC = @decompressionConstantC;
 	end
 	
-	set @mMinus = @stepArm1 /*м*/ * @stepF /*H*/ * @stepRelation1 * @angleStep * @Rad * @unit; -- момент опорного ротора Н*м
-	set @mPlus = @stepArm2 * @stepF * @stepRelation2 * @angleStep * @Rad * @unit; -- момент ведущего ротора
+	set @mMinus = @stepArm1 /*м*/ * @stepF /*H*/ * @stepRelation1 * /*@angleStep * @Rad */ @unit; -- момент опорного ротора Н*м
+	set @mPlus = @stepArm2 * @stepF * @stepRelation2 * /*@angleStep * @Rad */ @unit; -- момент ведущего ротора
 	set @stepM = @mPlus - @mMinus; -- результирующий момент
 	set @stepWork = @stepM * @angleStep * @Rad;
 	
