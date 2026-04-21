@@ -584,7 +584,7 @@ begin
 	set @mMinus = @stepArm1 /*м*/ * @stepF /*H*/ * @stepRelation1 * /*@angleStep * @Rad */ @unit ; -- момент опорного ротора Н*м
 	set @mPlus = @stepArm2 * @stepF * @stepRelation2 * /*@angleStep * @Rad */ @unit; -- момент ведущего ротора
 	set @stepM = @mPlus - @mMinus; -- результирующий момент
-	set @stepWork = @stepM * @angleStep * @Rad; -- Ватт 
+	set @stepWork = @stepM * @angleStep * @Rad; -- Дж 
 
 	declare @vp1 float;
 	select @vp1 = volumePartRotor from phases where round(Angle,2) = @currentAngle 
@@ -596,11 +596,11 @@ begin
 end
 
 --select * from @resultHot order by angle
-/*
-select
-((select sum(stepWork) from @resultHot where angle < 181) - 
-(select sum(stepWork) from @resultHot where angle > 180))
-*/
+
+--select
+--((select sum(stepWork) from @resultHot where angle < 181) - 
+--(select sum(stepWork) from @resultHot where angle > 180))
+
 --return
 
 
@@ -666,7 +666,7 @@ begin
 	set @mMinus = @stepArm1 /*м*/ * @stepF /*H*/ * @stepRelation1 * /*@angleStep * @Rad */ @unit; -- момент опорного ротора Н*м
 	set @mPlus = @stepArm2 * @stepF * @stepRelation2 * /*@angleStep * @Rad */ @unit; -- момент ведущего ротора
 	set @stepM = @mPlus - @mMinus; -- результирующий момент
-	set @stepWork = @stepM * @angleStep * @Rad;
+	set @stepWork = @stepM * @angleStep * @Rad; -- Дж
 	
 	insert into @resultCold(phase, angle, stepP, stepV, stepT,  stepF,  stepM,  stepWork)
 	values(@phase, round(@currentAngle,2), @stepP, @stepVolume, @stepT,  @stepF, @stepM, @stepWork)
@@ -693,15 +693,13 @@ inner join @resultCold rc on ROUND(rh.angle, 2) = ROUND(rc.angle, 2);
 
 --return
 
-
-
 ---------------------------------------------------------------------------------------------------
 declare @hotExpansionWork float;
 declare @hotCompressionWork float;
 declare @coldWork float;
 
 select 
-@hotExpansionWork = sum(stepWork) 
+@hotExpansionWork = sum(stepWork) -- Дж
 from 
 @resultHot hw 
 inner join phases p on hw.angle = p.Angle
@@ -759,6 +757,7 @@ isnull(p.Blow, 0) != 1
 and
 isnull(p.Intake, 0) != 1)
 
+-- работа в Дж/такт
 select @hotExpansionWork as HotWork, @hotCompressionWork as HotCompressionWork, @coldWork as ColdWork, @coldWork1 as ColdCompressionWork, @coldWork2 as ColdExpansionWork, (@hotExpansionWork - (@hotCompressionWork + @coldWork)) * 2.0 as ResultWork
 
 --return

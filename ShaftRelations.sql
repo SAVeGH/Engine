@@ -161,4 +161,4 @@ select
 -- LongAngle	    ShortAngle	        AnglesRelation
 -- 64,4238136159827	115,576186384017	0,557414253157012
 
---select @shift * 21.48 -- 8,4875027027027
+--select @shift, @shift * 21.48 -- 8,4875027027027
