@@ -34,7 +34,10 @@ declare @ellipseLen float = (select len from elen where round(n,2) = 0.86); --(s
 
 declare @ellipseR float = @ellipseLen / (2.0 * @PI); -- какому раудиусу круга соответсвует длина эллипса шестерни
 declare @midCylinderR float = @ellipseLen * @relation / (2.0 * @PI); -- средний радиус передачи цилиндров
-declare @axisDistance float = @ellipseR + @midCylinderR; -- межцентровое расстояние
+declare @axisDistance float = @ellipseR + @midCylinderR; -- межцентровое расстояние в относительных единицах 2,79321755816625
+
+--select @axisDistance, @axisDistance * @unit
+--return
 
 /*
 уравнение эллипса
@@ -146,6 +149,9 @@ SQRT(POWER(ax.arm2, 2) + POWER((LAG(ax.arm2) over (order by ax.angle)), 2) - 2.0
 from 
 @srcEllipseArms ax) as x on x.Angle = a.Angle;
 
+--select * from @srcEllipseArms order by Angle
+--return
+
 -- углы поворота передачи на каждый шаг
 update a
 set
@@ -161,17 +167,23 @@ isnull(ACOS((POWER(ax.rarm2, 2) + POWER((LAG(ax.rarm2) over (order by ax.angle))
 from 
 @srcEllipseArms ax) as x on x.Angle = a.Angle;
 
-
-
-
-select @shift * @unit, @axisDistance * @unit --9,77357701907229, 59,9983131494111
-
+--select @shift * @unit, @axisDistance * @unit --9,77357701907229, 59,9983131494111
+/*
+select 
+sum(rangle1) as shortRun, --25.259
+sum(rangle2) as longRun,
+90.0 / (sum(rangle1) + sum(rangle2)) as correction 
+from @srcEllipseArms
+return
+*/
 select 
 (sum(rangle1) * 2.0) as shortRun, 
 (sum(rangle2) * 2.0) as longRun, 
 ((sum(rangle1) + sum(rangle2)) * 2.0) as fullRun,
-90.0 / (sum(rangle1) + sum(rangle2)) from @srcEllipseArms
+90.0 / (sum(rangle1) + sum(rangle2)) as correction 
+from @srcEllipseArms
 
+--return
 /*
 select 
 * 
